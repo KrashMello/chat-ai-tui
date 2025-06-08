@@ -1,11 +1,11 @@
 certifi==2025.4.26
 charset-normalizer==3.4.2
 idna==3.10
-markdown-it-py==3.0.0
 mdurl==0.1.2
 Pygments==2.19.1
 python-dotenv==1.0.1
 requests==2.32.3
-rich==13.7.0
+rich==13.3.3
+textual==3.3.0
 toml==0.10.2
 urllib3==2.4.0
