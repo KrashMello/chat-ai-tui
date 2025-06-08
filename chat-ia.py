@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import subprocess
 import os
 import requests
@@ -6,7 +7,6 @@ import threading
 import signal
 import sys
 from time import sleep
-from pynput import keyboard as kb
 
 URL = "https://api.groq.com/openai/v1/chat/completions"
 MODEL = "llama-3.3-70b-versatile"
