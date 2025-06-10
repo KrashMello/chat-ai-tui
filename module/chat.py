@@ -201,6 +201,7 @@ def help():
     print("Comandos disponibles:")
     print("/new: Reinicia el chat")
     print("/exit: Salir del chat")
+    print("/load: Listar los chats")
     print("/help: Mostrar este mensaje")
     print("/setApiKey: Guardar la API key")
     print("/setProvider: Cambiar el proveedor")
@@ -212,7 +213,8 @@ def help():
 def clear():
     global provider, model
     os.system("cls" if os.name == "nt" else "clear")
-    print("Chat AI - Tui")
+    print("Chat AI - CLI")
+    print("Version 0.2.0")
     print("Ingrese tus preguntas y recibirás respuestas")
     print("Usa el comando /help para ver los comandos disponibles")
     print(f"Usando el proveedor {provider}")
@@ -227,7 +229,7 @@ def chat():
         match question:
             case "clear":
                 clear()
-            case "/list":
+            case "/load":
                 load_chat()
             case "/new":
                 save_chat()
