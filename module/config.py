@@ -20,6 +20,8 @@ API_KEY="api_key"
 """
 path_config = HOME_DIR + "/.config/chat-ai/config.toml"
 
+path_history = HOME_DIR + "/.config/chat-ai/history/"
+
 
 def get_ia_config(type: str):
     if os.path.exists(path_config):

@@ -5,12 +5,14 @@ import json
 import threading
 import sys
 from time import sleep
+
 from module.config import (
     get_ia_config,
     set_config_provider,
     set_config_provider_api_key,
     set_config_provider_model,
     set_config_provider_url,
+    path_history,
 )
 from rich.console import Console
 from rich.markdown import Markdown
@@ -22,6 +24,96 @@ provider = get_ia_config("PROVIDER")
 api_key = get_ia_config("API_KEY")
 url = get_ia_config("URL")
 model = get_ia_config("MODEL")
+
+
+def save_chat():
+    global messages, provider
+    name = ""
+    data = {}
+    data["data"] = []
+    if provider == "groq":
+        name = messages[0]["content"]
+    if provider == "gemini":
+        name = messages[0]["parts"]["text"]
+    file_name = f"{name}.json"
+    path_file = os.path.join(path_history, file_name)
+    if not os.path.exists(path_file):
+        os.makedirs(os.path.dirname(path_history), exist_ok=True)
+    for message in messages:
+        if provider == "groq":
+            data["data"].append({message["role"]: message["content"]})
+        if provider == "gemini":
+            if message["role"] == "user":
+                data["data"].append({message["role"]: message["parts"]["text"]})
+            else:
+                data["data"].append({message["role"]: message["parts"][0]["text"]})
+    with open(path_file, "w") as f:
+        json.dump(data, f, indent=4)
+
+
+def load_chat():
+    global messages
+    messages = []
+    files = os.listdir(path_history)
+    list = []
+    for i, file in enumerate(files):
+        file_name = file.split(".")[0]
+        list.append(f"[{i}] {file_name}")
+    print("\n".join(list))
+    file_selected = input("Ingresa el numero del chat: ")
+    if not file_selected.isdigit():
+        print("debe ingresar un numero")
+        return ""
+    file_selected = int(file_selected)
+    if file_selected > len(files) or file_selected < 0:
+        print("numero invalido")
+        return ""
+    file_name = files[file_selected]
+    with open(os.path.join(path_history, file_name), "r") as f:
+        data = json.load(f)
+    for item in data["data"]:
+        role = "user"
+        message = ""
+        for aurole, aumessage in item.items():
+            role = aurole
+            message = aumessage
+        if provider == "groq":
+            if role == "user":
+                message = f"{message}\n"
+            if role == "model":
+                role = "assistant"
+            messages.append(
+                {
+                    "role": role,
+                    "content": message,
+                }
+            )
+        if provider == "gemini":
+            if role == "assistant":
+                role = "model"
+            if role == "user":
+                messages.append(
+                    {
+                        "role": role,
+                        "parts": {
+                            "text": message,
+                        },
+                    }
+                )
+
+                message = f"{message}\n"
+            else:
+                messages.append(
+                    {
+                        "role": role,
+                        "parts": [
+                            {
+                                "text": message,
+                            }
+                        ],
+                    }
+                )
+        console.print(Markdown(f"> {message}"))
 
 
 def reset_chat():
@@ -135,10 +227,15 @@ def chat():
         match question:
             case "clear":
                 clear()
+            case "/list":
+                load_chat()
             case "/new":
+                save_chat()
                 reset_chat()
                 clear()
             case "/exit":
+                if len(messages) > 0:
+                    save_chat()
                 exit = True
             case "/help":
                 help()
