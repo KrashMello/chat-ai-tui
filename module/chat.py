@@ -78,8 +78,6 @@ def load_chat():
             role = aurole
             message = aumessage
         if provider == "groq":
-            if role == "user":
-                message = f"{message}\n"
             if role == "model":
                 role = "assistant"
             messages.append(
@@ -100,8 +98,6 @@ def load_chat():
                         },
                     }
                 )
-
-                message = f"{message}\n"
             else:
                 messages.append(
                     {
@@ -113,7 +109,11 @@ def load_chat():
                         ],
                     }
                 )
-        console.print(Markdown(f"> {message}"))
+        if role == "user":
+            message = f"👤: {message}"
+        else:
+            message = f"🤖: {message}"
+        console.print(Markdown(message))
 
 
 def reset_chat():
@@ -153,7 +153,7 @@ def ask(question):
         messages.append(
             {
                 "role": "user",
-                "content": question,
+                "content": f"{question}\n",
             }
         )
     if provider == "gemini":
@@ -165,7 +165,7 @@ def ask(question):
             {
                 "role": "user",
                 "parts": {
-                    "text": question,
+                    "text": f"{question}\n",
                 },
             }
         )
@@ -223,7 +223,7 @@ def chat():
     global exit, provider, model, api_key, url
     clear()
     while not exit:
-        question = input("> ")
+        question = input("👤: ")
         match question:
             case "clear":
                 clear()
@@ -274,4 +274,4 @@ def chat():
             case _:
                 message = ask(question)
                 if message:
-                    console.print(Markdown(message))
+                    console.print(Markdown(f"🤖: {message}"))
