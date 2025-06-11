@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 HOME_DIR = os.path.expanduser("~")
 providers = ["groq", "gemini"]
-default_config = """
+DEFAULT_CONFIG = """
 [global]
 provider="gemini"
 theme="nord"
@@ -18,15 +18,17 @@ URL="https://generativelanguage.googleapis.com/v1beta/models"
 MODEL="gemini-2.0-flash"
 API_KEY="api_key"
 """
-path_config = HOME_DIR + "/.config/chat-ai/config.toml"
 
-path_history = HOME_DIR + "/.config/chat-ai/history/"
+PATH_CONFIG = HOME_DIR + "/.config/chat-ai/config.toml"
+
+PATH_HISTORY = HOME_DIR + "/.config/chat-ai/history/"
+VERSION = "Experimental 0.2.1"
 
 
 def get_ia_config(type: str):
-    if os.path.exists(path_config):
+    if os.path.exists(PATH_CONFIG):
         try:
-            with open(path_config, "r") as archivo:
+            with open(PATH_CONFIG, "r") as archivo:
                 configuracion = toml.load(archivo)
             provider = configuracion["global"]["provider"]
 
@@ -38,11 +40,11 @@ def get_ia_config(type: str):
             print("Error al cargar la configuración:", str(e))
     else:
         try:
-            os.makedirs(os.path.dirname(path_config), exist_ok=True)
-            with open(path_config, "w") as archivo:
-                toml.dump(toml.loads(default_config), archivo)
+            os.makedirs(os.path.dirname(PATH_CONFIG), exist_ok=True)
+            with open(PATH_CONFIG, "w") as archivo:
+                toml.dump(toml.loads(DEFAULT_CONFIG), archivo)
 
-            with open(path_config, "r") as archivo:
+            with open(PATH_CONFIG, "r") as archivo:
                 configuracion = toml.load(archivo)
 
             provider = configuracion["global"]["provider"]
@@ -57,10 +59,10 @@ def get_ia_config(type: str):
 
 def set_config_provider_api_key(provider: str, api_key: str):
     try:
-        with open(HOME_DIR + "/.config/chat-ai/config.toml", "r") as archivo:
+        with open(PATH_CONFIG, "r") as archivo:
             configuracion = toml.load(archivo)
         configuracion[provider]["API_KEY"] = api_key
-        with open(HOME_DIR + "/.config/chat-ai/config.toml", "w") as archivo:
+        with open(PATH_CONFIG, "w") as archivo:
             toml.dump(configuracion, archivo)
     except Exception as e:
         print("Error al cargar la configuración:", str(e))
@@ -73,10 +75,10 @@ def set_config_provider(provider: str):
             print(f"los proveedores disponibles son: {', '.join(providers)}")
             return None
         else:
-            with open(HOME_DIR + "/.config/chat-ai/config.toml", "r") as archivo:
+            with open(PATH_CONFIG, "r") as archivo:
                 configuracion = toml.load(archivo)
             configuracion["global"]["provider"] = provider
-            with open(HOME_DIR + "/.config/chat-ai/config.toml", "w") as archivo:
+            with open(PATH_CONFIG, "w") as archivo:
                 toml.dump(configuracion, archivo)
             return True
     except Exception as e:
@@ -85,10 +87,10 @@ def set_config_provider(provider: str):
 
 def set_config_provider_url(provider: str, url: str):
     try:
-        with open(HOME_DIR + "/.config/chat-ai/config.toml", "r") as archivo:
+        with open(PATH_CONFIG, "r") as archivo:
             configuracion = toml.load(archivo)
         configuracion[provider]["URL"] = url
-        with open(HOME_DIR + "/.config/chat-ai/config.toml", "w") as archivo:
+        with open(PATH_CONFIG, "w") as archivo:
             toml.dump(configuracion, archivo)
     except Exception as e:
         print("Error al cargar la configuración:", str(e))
@@ -96,10 +98,10 @@ def set_config_provider_url(provider: str, url: str):
 
 def set_config_provider_model(provider: str, model: str):
     try:
-        with open(HOME_DIR + "/.config/chat-ai/config.toml", "r") as archivo:
+        with open(PATH_CONFIG, "r") as archivo:
             configuracion = toml.load(archivo)
         configuracion[provider]["MODEL"] = model
-        with open(HOME_DIR + "/.config/chat-ai/config.toml", "w") as archivo:
+        with open(PATH_CONFIG, "w") as archivo:
             toml.dump(configuracion, archivo)
     except Exception as e:
         print("Error al cargar la configuración:", str(e))
