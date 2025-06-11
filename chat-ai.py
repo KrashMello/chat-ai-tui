@@ -4,7 +4,7 @@ import signal
 import sys
 from dotenv import load_dotenv
 
-from module.chat import chat
+from module.chat import chat, save_chat
 
 load_dotenv()
 
@@ -15,6 +15,7 @@ def main():
 
 
 def handler(sig, frame):
+    save_chat()
     print("\nPrograma terminado con Ctrl+C")
     sys.exit(0)
 
