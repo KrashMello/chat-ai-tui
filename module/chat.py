@@ -7,12 +7,13 @@ import sys
 from time import sleep
 
 from module.config import (
+    VERSION,
     get_ia_config,
     set_config_provider,
     set_config_provider_api_key,
     set_config_provider_model,
     set_config_provider_url,
-    path_history,
+    PATH_HISTORY,
 )
 from rich.console import Console
 from rich.markdown import Markdown
@@ -28,33 +29,33 @@ model = get_ia_config("MODEL")
 
 def save_chat():
     global messages, provider
-    name = ""
-    data = {}
-    data["data"] = []
-    if provider == "groq":
-        name = messages[0]["content"]
-    if provider == "gemini":
-        name = messages[0]["parts"]["text"]
-    file_name = f"{name}.json"
-    path_file = os.path.join(path_history, file_name)
-    if not os.path.exists(path_file):
-        os.makedirs(os.path.dirname(path_history), exist_ok=True)
-    for message in messages:
+    if len(messages) > 0:
+        name = ""
+        data = {}
+        data["data"] = []
         if provider == "groq":
-            data["data"].append({message["role"]: message["content"]})
+            name = messages[0]["content"]
         if provider == "gemini":
-            if message["role"] == "user":
-                data["data"].append({message["role"]: message["parts"]["text"]})
-            else:
-                data["data"].append({message["role"]: message["parts"][0]["text"]})
-    with open(path_file, "w") as f:
-        json.dump(data, f, indent=4)
+            name = messages[0]["parts"]["text"]
+        file_name = f"{name}.json"
+        path_file = os.path.join(PATH_HISTORY, file_name)
+        if not os.path.exists(path_file):
+            os.makedirs(os.path.dirname(PATH_HISTORY), exist_ok=True)
+        for message in messages:
+            if provider == "groq":
+                data["data"].append({message["role"]: message["content"]})
+            if provider == "gemini":
+                if message["role"] == "user":
+                    data["data"].append({message["role"]: message["parts"]["text"]})
+                else:
+                    data["data"].append({message["role"]: message["parts"][0]["text"]})
+        with open(path_file, "w") as f:
+            json.dump(data, f, indent=4)
 
 
 def load_chat():
-    global messages
-    messages = []
-    files = os.listdir(path_history)
+    reset_chat()
+    files = os.listdir(PATH_HISTORY)
     list = []
     for i, file in enumerate(files):
         file_name = file.split(".")[0]
@@ -69,7 +70,7 @@ def load_chat():
         print("numero invalido")
         return ""
     file_name = files[file_selected]
-    with open(os.path.join(path_history, file_name), "r") as f:
+    with open(os.path.join(PATH_HISTORY, file_name), "r") as f:
         data = json.load(f)
     for item in data["data"]:
         role = "user"
@@ -118,6 +119,8 @@ def load_chat():
 
 def reset_chat():
     global messages
+    save_chat()
+    clear()
     messages = []  # Limpiamos el messages
 
 
@@ -191,6 +194,7 @@ def ask(question):
             case _:
                 response = json_response["choices"][0]["message"]["content"]
                 messages.append(json_response["choices"][0]["message"])
+        save_chat()
         return response
     except requests.exceptions.RequestException as e:
         print(f"\nError de conexión: {str(e)}")
@@ -214,7 +218,7 @@ def clear():
     global provider, model
     os.system("cls" if os.name == "nt" else "clear")
     print("Chat AI - CLI")
-    print("Version 0.2.0")
+    print(f"Version {VERSION}")
     print("Ingrese tus preguntas y recibirás respuestas")
     print("Usa el comando /help para ver los comandos disponibles")
     print(f"Usando el proveedor {provider}")
@@ -232,12 +236,10 @@ def chat():
             case "/load":
                 load_chat()
             case "/new":
-                save_chat()
                 reset_chat()
                 clear()
             case "/exit":
-                if len(messages) > 0:
-                    save_chat()
+                save_chat()
                 exit = True
             case "/help":
                 help()
