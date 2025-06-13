@@ -8,9 +8,9 @@ class ChatContainer(Container):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add_class("chat-container")
+        self.can_focus = True
 
     def add_message(self, content: str, is_user: bool = False):
-        """Agregar un nuevo mensaje al chat."""
         message = ChatMessage(content, is_user)
         self.mount(message)
         self.scroll_end()
